@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EchoGrid — Visual Multi Ping</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ── Toolbar ─────────────────────────────────────────────── -->
+  <div id="toolbar">
+    <div id="add-host">
+      <input type="text" id="host-input" placeholder="IP ou hostname…" autofocus />
+      <select id="monitor-type">
+        <option value="icmp">ICMP Ping</option>
+        <option value="tcp">TCP Port</option>
+      </select>
+      <input type="number" id="port-input" placeholder="Port" min="1" max="65535" style="display:none" list="common-ports" />
+      <datalist id="common-ports">
+        <option value="21" label="FTP"></option>
+        <option value="22" label="SSH"></option>
+        <option value="23" label="Telnet"></option>
+        <option value="25" label="SMTP"></option>
+        <option value="53" label="DNS"></option>
+        <option value="80" label="HTTP"></option>
+        <option value="110" label="POP3"></option>
+        <option value="143" label="IMAP"></option>
+        <option value="443" label="HTTPS"></option>
+        <option value="993" label="IMAPS"></option>
+        <option value="3306" label="MySQL"></option>
+        <option value="3389" label="RDP"></option>
+        <option value="5432" label="PostgreSQL"></option>
+        <option value="5900" label="VNC"></option>
+        <option value="6379" label="Redis"></option>
+        <option value="8080" label="HTTP-alt"></option>
+        <option value="8443" label="HTTPS-alt"></option>
+        <option value="27017" label="MongoDB"></option>
+      </datalist>
+      <button id="add-btn">
+        <svg class="icon" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        Ajouter
+      </button>
+    </div>
+    <div id="actions">
+      <button id="stop-all-btn" class="btn-danger">
+        <svg class="icon" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2" fill="currentColor"/></svg>
+        Stop tout
+      </button>
+      <button id="settings-btn" class="btn-secondary">
+        <svg class="icon" viewBox="0 0 20 20"><path d="M10 13a3 3 0 100-6 3 3 0 000 6zm6.32-2.16l1.28.74-1.5 2.6-1.44-.86a5.9 5.9 0 01-1.4.81l-.16 1.67h-3l-.16-1.67a5.9 5.9 0 01-1.4-.81l-1.44.86-1.5-2.6 1.28-.74a5.9 5.9 0 010-1.68l-1.28-.74 1.5-2.6 1.44.86a5.9 5.9 0 011.4-.81l.16-1.67h3l.16 1.67a5.9 5.9 0 011.4.81l1.44-.86 1.5 2.6-1.28.74a5.9 5.9 0 010 1.68z" fill="currentColor"/></svg>
+        Paramètres
+      </button>
+      <button id="history-btn" class="btn-secondary">
+        <svg class="icon" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="17" cy="15" r="1.5" fill="currentColor"/></svg>
+        Historique
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Stats bar ───────────────────────────────────────────── -->
+  <div id="stats-bar">
+    <span id="stats-total">
+      <svg class="icon-sm" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor"/></svg>
+      <span>0</span>
+    </span>
+    <span id="stats-up" class="stat-up">
+      <svg class="icon-sm" viewBox="0 0 16 16"><path d="M8 2l6 10H2z" fill="currentColor"/></svg>
+      <span>0</span>
+    </span>
+    <span id="stats-down" class="stat-down">
+      <svg class="icon-sm" viewBox="0 0 16 16"><path d="M8 14L2 4h12z" fill="currentColor"/></svg>
+      <span>0</span>
+    </span>
+    <span id="stats-uptime" class="stat-uptime">
+      <svg class="icon-sm" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 4v4l3 2" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>—</span>
+    </span>
+  </div>
+
+  <!-- ── Hosts grid ──────────────────────────────────────────── -->
+  <div id="hosts-grid">
+    <div id="empty-state">
+      <svg class="empty-icon" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="40" cy="40" r="28" opacity="0.3"/>
+        <circle cx="40" cy="40" r="18" opacity="0.4"/>
+        <circle cx="40" cy="40" r="8" opacity="0.6"/>
+        <line x1="40" y1="40" x2="58" y2="22" stroke-linecap="round"/>
+        <circle cx="52" cy="28" r="3" fill="currentColor" stroke="none"/>
+        <circle cx="46" cy="34" r="2" fill="currentColor" stroke="none" opacity="0.5"/>
+      </svg>
+      <p class="empty-title">Aucun hôte monitoré</p>
+      <p class="empty-sub">Entrez une adresse IP ou un hostname ci-dessus pour commencer</p>
+    </div>
+  </div>
+
+  <!-- ── History panel ──────────────────────────────────────── -->
+  <div id="history-panel" class="hidden">
+    <div id="history-header">
+      <span>
+        <svg class="icon" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="17" cy="15" r="1.5" fill="currentColor"/></svg>
+        Historique
+      </span>
+      <div id="history-controls">
+        <select id="history-filter">
+          <option value="all">Tous</option>
+          <option value="up">UP uniquement</option>
+          <option value="down">DOWN uniquement</option>
+          <option value="error">ERR uniquement</option>
+        </select>
+        <button id="history-close" class="btn-icon" title="Fermer">
+          <svg class="icon" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <table id="history-table">
+      <thead>
+        <tr>
+          <th>Heure</th>
+          <th>Hôte</th>
+          <th>État</th>
+          <th>Latence</th>
+          <th>Détail</th>
+        </tr>
+      </thead>
+      <tbody id="history-body"></tbody>
+    </table>
+  </div>
+
+  <!-- ── Confirm modal ────────────────────────────────────────── -->
+  <div id="confirm-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>
+        <svg class="icon" viewBox="0 0 20 20"><path d="M10 2L1 18h18L10 2z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="8" x2="10" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14.5" r="0.8" fill="currentColor"/></svg>
+        Confirmation
+      </h2>
+      <p id="confirm-msg">Arrêter tous les monitorings ?</p>
+      <div class="modal-actions">
+        <button id="confirm-yes" class="btn-danger">Oui, arrêter</button>
+        <button id="confirm-no" class="btn-secondary">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Settings modal ──────────────────────────────────────── -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>
+        <svg class="icon" viewBox="0 0 20 20"><path d="M10 13a3 3 0 100-6 3 3 0 000 6zm6.32-2.16l1.28.74-1.5 2.6-1.44-.86a5.9 5.9 0 01-1.4.81l-.16 1.67h-3l-.16-1.67a5.9 5.9 0 01-1.4-.81l-1.44.86-1.5-2.6 1.28-.74a5.9 5.9 0 010-1.68l-1.28-.74 1.5-2.6 1.44.86a5.9 5.9 0 011.4-.81l.16-1.67h3l.16 1.67a5.9 5.9 0 011.4.81l1.44-.86 1.5 2.6-1.28.74a5.9 5.9 0 010 1.68z" fill="currentColor"/></svg>
+        Paramètres
+      </h2>
+      <fieldset>
+        <legend>ICMP Ping</legend>
+        <label>Intervalle (ms) <input type="number" id="set-interval" value="2000" min="100" /></label>
+        <label>Timeout (ms) <input type="number" id="set-timeout" value="1000" min="50" /></label>
+        <label>TTL <input type="number" id="set-ttl" value="64" min="1" max="255" /></label>
+        <label>Taille paquet (B) <input type="number" id="set-packet-size" value="32" min="1" /></label>
+      </fieldset>
+      <fieldset>
+        <legend>TCP Monitor</legend>
+        <label>Timeout (ms) <input type="number" id="set-tcp-timeout" value="3000" min="50" /></label>
+      </fieldset>
+      <fieldset>
+        <legend>Affichage</legend>
+        <label>Seuil latence
+          <svg class="icon-sm" style="color:var(--orange)" viewBox="0 0 16 16"><path d="M8 2l6 10H2z" fill="currentColor"/></svg>
+          (ms) <input type="number" id="set-latency-warn" value="50" min="0" step="1" /></label>
+        <label>Seuil latence
+          <svg class="icon-sm" style="color:var(--red)" viewBox="0 0 16 16"><path d="M8 2l6 10H2z" fill="currentColor"/></svg>
+          (ms) <input type="number" id="set-latency-crit" value="150" min="0" step="1" /></label>
+      </fieldset>
+      <fieldset>
+        <legend>Alertes</legend>
+        <label class="checkbox-label">
+          <input type="checkbox" id="set-alert-sound" checked />
+          Bip système quand hôte passe KO
+        </label>
+      </fieldset>
+      <div class="modal-actions">
+        <button id="settings-save" class="btn-primary">
+          <svg class="icon" viewBox="0 0 20 20"><path d="M3 10l4 4 10-10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sauvegarder
+        </button>
+        <button id="settings-close" class="btn-secondary">
+          <svg class="icon" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast container ─────────────────────────────────────── -->
+  <div id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
