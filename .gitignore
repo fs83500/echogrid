@@ -1,8 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+src-tauri/target/
+.cargo/
+
+# Env
 .env
 .env.*
-node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python (si outils annexes)
 __pycache__/
 .venv/
-dist/
-build/
+
+# Logs
 *.log
+
+# Temp/cache
+.cache/
+.local/
+.npm/
+
+# Screenshots
+echogrid_*.png
+
+# Python venv
+.venv/
